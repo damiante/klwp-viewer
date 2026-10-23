@@ -1,8 +1,9 @@
 # KLWP Editor
 
 View, edit and export Kustom Live Wallpaper presets (`.klwp`). The web editor runs entirely
-client-side (suitable for GitHub Pages); the `klwp` CLI does the same edits headlessly and renders
-PNGs, for scripts and LLM agents.
+client-side and is live at **https://damiantesta.com/klwp-viewer/** (deployed from `main` by
+GitHub Actions); the `klwp` CLI does the same edits headlessly and renders PNGs, for scripts and
+LLM agents.
 
 ```sh
 npm install
