@@ -1,0 +1,23 @@
+[
+  { "op": "set", "target": "/", "props": { "background_color": "#FF1A1A22" } },
+  { "op": "add", "parent": "/", "type": "OverlapLayerModule", "title": "Analog", "props": { "position_anchor": "CENTER" },
+    "children": [
+      { "type": "ShapeModule", "title": "Face", "props": { "shape_type": "CIRCLE", "shape_width": 500, "paint_color": "#FF2B2B36" } },
+      { "type": "ShapeModule", "title": "Battery ring",
+        "props": { "shape_type": "SLICE", "shape_width": 540, "shape_height": 14, "paint_color": "#FF7CFFB2",
+                   "shape_angle": { "formula": "$bi(level) * 3.6$" } } },
+      { "type": "OverlapLayerModule", "title": "Hour hand", "props": { "config_rotate_mode": "CLOCK_HOUR_SMOOTH" },
+        "children": [
+          { "type": "ShapeModule",
+            "props": { "shape_type": "RECT", "shape_width": 12, "shape_height": 130, "shape_corners": 6, "paint_color": "#FFFFFFFF",
+                       "position_padding_bottom": 130 } }
+        ] },
+      { "type": "OverlapLayerModule", "title": "Minute hand", "props": { "config_rotate_mode": "CLOCK_MINUTE" },
+        "children": [
+          { "type": "ShapeModule",
+            "props": { "shape_type": "RECT", "shape_width": 8, "shape_height": 200, "shape_corners": 4, "paint_color": "#FFFF4081",
+                       "position_padding_bottom": 200 } }
+        ] },
+      { "type": "ShapeModule", "title": "Pin", "props": { "shape_type": "CIRCLE", "shape_width": 24, "paint_color": "#FFFFFFFF" } }
+    ] }
+]

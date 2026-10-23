@@ -1,0 +1,48 @@
+[
+  { "op": "global", "name": "accent", "type": "COLOR", "value": "#FF00E5FF" },
+  { "op": "global", "name": "text", "type": "COLOR", "value": "#FFE8F7FF" },
+  { "op": "set", "target": "/", "props": { "background_color": "#FF07070F" } },
+  { "op": "add", "parent": "/", "type": "StackLayerModule", "title": "Clock", "as": "clock",
+    "props": { "config_stacking": "VERTICAL_CENTER", "config_margin": 12, "position_anchor": "CENTER", "position_offset_y": -120 },
+    "animations": [{ "type": "SCROLL", "center": "CENTER", "speed": 200 }],
+    "children": [
+      { "type": "TextModule", "title": "Time", "props": {
+          "text_expression": "$df(HH:mm)$", "text_family": "kfile://org.kustom.provider/fonts/Sarpanch-Regular.ttf",
+          "text_size": 190, "paint_color": { "global": "text" },
+          "fx_shadow": "OUTER", "fx_shadow_distance": 0, "fx_shadow_blur": 60, "fx_shadow_color": { "global": "accent" } } },
+      { "type": "ShapeModule", "title": "Rule", "props": { "shape_type": "RECT", "shape_width": 360, "shape_height": 3, "shape_corners": 2,
+          "paint_color": { "global": "accent" }, "fx_gradient": "HORIZONTAL", "fx_gradient_color": "#00000000" } },
+      { "type": "TextModule", "title": "Date", "props": {
+          "text_expression": "$tc(up, df(EEEE))$  ·  $df(d)$$tc(ord, df(d))$ $df(MMMM)$",
+          "text_family": "kfile://org.kustom.provider/fonts/RobotoCondensed-Light.ttf", "text_size": 34, "paint_color": { "global": "text" } } },
+      { "type": "StackLayerModule", "title": "Weather", "props": { "config_stacking": "HORIZONTAL_CENTER", "config_margin": 14, "position_padding_top": 30 },
+        "children": [
+          { "type": "FontIconModule", "props": { "icon_set": "kfile://org.kustom.provider/icons/meteo.ttf", "icon_icon": "cloudy", "icon_size": 64, "paint_color": { "global": "accent" } } },
+          { "type": "TextModule", "props": { "text_expression": "$wi(temp)$°$wi(tempu)$  $tc(cap, wi(cond))$",
+              "text_family": "kfile://org.kustom.provider/fonts/RobotoCondensed-Light.ttf", "text_size": 40, "paint_color": { "global": "text" } } }
+        ] }
+    ] },
+  { "op": "add", "parent": "/", "type": "StackLayerModule", "title": "Music", "as": "music",
+    "props": { "config_stacking": "VERTICAL_CENTER", "config_margin": 24, "position_anchor": "CENTER" },
+    "animations": [{ "type": "SCROLL", "center": "CENTER_P1", "speed": 200 }],
+    "children": [
+      { "type": "TextModule", "title": "Track", "props": { "text_expression": "$mi(title)$\n$mi(artist)$", "text_align": "CENTER",
+          "text_size_type": "FIT_TO_BOX", "text_width": 560, "text_height": 160,
+          "text_family": "kfile://org.kustom.provider/fonts/Sarpanch-Regular.ttf", "paint_color": { "global": "text" } } },
+      { "type": "OverlapLayerModule", "title": "Progress", "children": [
+          { "type": "ShapeModule", "props": { "shape_type": "RECT", "shape_width": 480, "shape_height": 6, "shape_corners": 3, "paint_color": "#33FFFFFF" } },
+          { "type": "ShapeModule", "props": { "shape_type": "RECT", "shape_height": 6, "shape_corners": 3, "position_anchor": "CENTERLEFT",
+              "shape_width": { "formula": "$mi(percent) * 4.8$" }, "paint_color": { "global": "accent" } } }
+      ] },
+      { "type": "StackLayerModule", "title": "Controls", "props": { "config_stacking": "HORIZONTAL_CENTER", "config_margin": 60 },
+        "children": [
+          { "type": "FontIconModule", "props": { "icon_set": "kfile://org.kustom.provider/icons/material.ttf", "icon_icon": "skip_previous", "icon_size": 90, "paint_color": { "global": "text" } },
+            "events": [{ "type": "SINGLE_TAP", "action": "MUSIC", "music_action": "PREVIOUS" }] },
+          { "type": "FontIconModule", "props": { "icon_set": "kfile://org.kustom.provider/icons/material.ttf", "icon_size": 120,
+              "icon_icon": { "formula": "$if(mi(state)=PLAYING, pause_circle_filled, play_circle_filled)$" }, "paint_color": { "global": "accent" } },
+            "events": [{ "type": "SINGLE_TAP", "action": "MUSIC", "music_action": "PLAY_PAUSE" }] },
+          { "type": "FontIconModule", "props": { "icon_set": "kfile://org.kustom.provider/icons/material.ttf", "icon_icon": "skip_next", "icon_size": 90, "paint_color": { "global": "text" } },
+            "events": [{ "type": "SINGLE_TAP", "action": "MUSIC", "music_action": "NEXT" }] }
+        ] }
+    ] }
+]

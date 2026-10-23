@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-cli
+*.apk
+
+# Personal presets stay local; only the anonymised samples are published.
+*.klwp
+!public/samples/*.klwp

@@ -1,0 +1,28 @@
+{
+  "name": "klwp-viewer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && npm run build:cli",
+    "build:cli": "esbuild src/cli/main.ts --bundle --platform=node --format=esm --packages=external --outfile=dist-cli/klwp.mjs --log-level=warning",
+    "klwp": "npm run -s build:cli && node dist-cli/klwp.mjs",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.10",
+    "fflate": "^0.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.8.3",
+    "vite": "^7.3.7",
+    "vitest": "^4.1.12"
+  },
+  "bin": {
+    "klwp": "dist-cli/klwp.mjs"
+  }
+}
