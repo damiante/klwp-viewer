@@ -61,13 +61,36 @@ formula overrides its value; `formula: ""` removes it.
 { "type": "SCROLL", "center": "CENTER_P1", "speed": 200, "rule": "CENTER", "action": "SCROLL", "angle": 0, "limit": 0 }
 ```
 
-- `type`: `SCROLL` (horizontal home-screen swipe, previewed) and others that are saved but not previewed
-  (`SCROLL_Y`, `GYRO`, `VISUALIZER`, `SWITCH`, `VISIBILITY`, `UNLOCK`, `LOOP_FW`, `LOOP_2W`, `FORMULA`).
+- `type`: `SCROLL` (horizontal home-screen swipe) and `LOOP_FW`/`LOOP_2W` (see Loops) are previewed; the others
+  are saved but not previewed (`SCROLL_Y`, `GYRO`, `VISUALIZER`, `SWITCH`, `VISIBILITY`, `UNLOCK`, `FORMULA`).
 - `center`: screen where the module sits at rest. `CENTER` = middle screen (`ceil((n-1)/2)`, 0-based),
   `CENTER_M1..3` / `CENTER_P1..3` left/right of it, `SCREEN1..9`, `FIRST`, `LAST`.
 - `speed`: percent. Movement per page = screen width / (screens - 1) × speed / 100.
 - `action`: `SCROLL` or `SCROLL_INVERTED` (also FADE, SCALE, ROTATE… not previewed).
 - `rule`: `CENTER` (always), `BEFORE_CENTER`/`UP_TO_CENTER` (only left of its screen), `FROM_CENTER`/`AFTER_CENTER`.
+
+### Loops (continuous motion)
+
+```json
+{ "type": "LOOP_FW", "action": "ROTATE", "duration": 900, "ease": "STRAIGHT", "amount": 100 }
+```
+
+Use loops instead of `df(s)` formulas for anything that should move smoothly; formulas only update once a second.
+
+- `LOOP_FW` runs progress 0→100 and restarts; `LOOP_2W` runs 0→100 then 100→0.
+- `duration` and `delay` are in **tenths of a second** (`duration: 600` = 1 minute). Each cycle lasts
+  `delay + duration` and is aligned to the Unix epoch, so a 600 loop restarts exactly on every minute
+  (a smooth seconds sweep stays in sync with the clock).
+- `ease`: `STRAIGHT`/`LINEAR` constant speed, `NORMAL` (default) ease in-out, `INVERTED`, `ACCELERATE`, `DECELERATE`,
+  `BOUNCE`, `OVERSHOOT`, `ANTICIPATE`, `ANTICIPATE_OVERSHOOT`, `NORMAL_2W`, `STRAIGHT_2W` (only the first three are previewed exactly).
+- `action` at progress p (0..100), with `amount` (default 100):
+  - `ROTATE` / `ROTATE_INVERTED`: p × amount × 3.6 / 100 degrees around `anchor` (`amount: 100` = one full turn).
+  - `FADE`: opacity 100 − p × amount / 100 % (`amount: 82` pulses down to 18 %); `FADE_INVERTED`: p × amount / 100 %.
+  - `SCROLL` / `SCROLL_INVERTED`: moves p / 100 × 7.2 × `speed` units along `angle` (0 = right, 90 = down).
+  - `SCALE`, `SCALE_X`, `SCALE_Y`: scale 1 − p × amount / 10000 around `anchor` (shrinks to 0 at amount 100).
+- `anchor`: `MODULE_CENTER` (default), `MODULE_LEFT`, `MODULE_RIGHT`, `MODULE_TOP`, `MODULE_BOTTOM`, `MODULE_TOP_LEFT`…,
+  or `SCREEN_*`. Padding is part of the module box, so wrap a padded module in a positioned overlap
+  before scaling it around an edge.
 
 ## Touch events
 

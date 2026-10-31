@@ -753,6 +753,60 @@ function scrollTranslation(m: Mod): [number, number] {
   return [tx, ty];
 }
 
+const accelDecel = (p: number) => (Math.cos((p / 100 + 1) * Math.PI) / 2 + 0.5) * 100;
+
+/** LOOP_FW / LOOP_2W progress (0..100) at `ms` (AnimationModule.d() + z(): cycles are aligned to the epoch). */
+export function loopProgress(a: Record<string, unknown>, ms: number): number {
+  const duration = Number(a.duration ?? 10), delay = Number(a.delay ?? 0); // tenths of a second
+  const cycle = Math.max(1, (delay + duration) * 100);
+  let p = Math.min(100, Math.max(0, (100 * ((ms % cycle) - delay * 100)) / Math.max(1, duration * 100)));
+  // shortcut: LOOP_2W assumes the first pass ran forward on an even cycle; the app flips from whenever it started.
+  if (a.type === 'LOOP_2W' && Math.floor(ms / cycle) % 2 === 1) p = 100 - p;
+  switch (String(a.ease ?? 'NORMAL')) {
+    case 'NORMAL': return accelDecel(p);
+    case 'INVERTED': return 100 - accelDecel(p);
+    default: return p; // shortcut: bounce/overshoot/anticipate/2W curves are previewed as linear
+  }
+}
+
+/** Loop animations (AnimationModule.c()): rotate, fade, scroll and scale around the anchor. */
+function applyLoops(ctx: CanvasRenderingContext2D, m: Mod) {
+  const anims = m.json.internal_animations;
+  if (!Array.isArray(anims)) return;
+  for (const a of anims as Record<string, unknown>[]) {
+    if (a.type !== 'LOOP_FW' && a.type !== 'LOOP_2W') continue;
+    const p = loopProgress(a, m.env.state.now.getTime());
+    const action = String(a.action ?? 'SCROLL');
+    const amount = Number(a.amount ?? 100);
+    // shortcut: SCREEN_* anchors use the module box like MODULE_* ones.
+    const anchor = String(a.anchor ?? 'MODULE_CENTER');
+    const px = anchor.includes('LEFT') ? 0 : anchor.includes('RIGHT') ? m.box.w : m.box.w / 2;
+    const py = anchor.includes('TOP') ? 0 : anchor.includes('BOTTOM') ? m.box.h : m.box.h / 2;
+    const around = (f: () => void) => {
+      ctx.translate(px, py);
+      f();
+      ctx.translate(-px, -py);
+    };
+    if (action === 'SCROLL' || action === 'SCROLL_INVERTED') {
+      // KContext.a.h0() is the screen's short side.
+      let d = ((Math.min(m.env.screenW, m.env.screenH) / 100) * Number(a.speed ?? 100) / 100) * p;
+      if (action === 'SCROLL_INVERTED') d = -d;
+      const ang = (Number(a.angle ?? 0) * Math.PI) / 180;
+      ctx.translate(d * Math.cos(ang), d * Math.sin(ang));
+    } else if (action === 'FADE' || action === 'FADE_INVERTED') {
+      const v = (p / 100) * amount;
+      ctx.globalAlpha *= Math.min(1, Math.max(0, (action === 'FADE' ? 100 - v : v) / 100));
+    } else if (action === 'ROTATE' || action === 'ROTATE_INVERTED') {
+      const deg = (p / 100) * amount * 3.6 * (action === 'ROTATE' ? 1 : -1);
+      around(() => ctx.rotate((deg * Math.PI) / 180));
+    } else if (action === 'SCALE' || action === 'SCALE_X' || action === 'SCALE_Y') {
+      const s = (100 - (p / 100) * amount) / 100;
+      around(() => ctx.scale(action === 'SCALE_Y' ? 1 : s, action === 'SCALE_X' ? 1 : s));
+    }
+    // shortcut: other loop actions (skew, flip, colour, shader, advanced) are not previewed.
+  }
+}
+
 function draw(ctx: CanvasRenderingContext2D, m: Mod) {
   if (!m.visible) return;
   if (!m.isLayer) {
@@ -819,6 +873,7 @@ function drawChild(ctx: CanvasRenderingContext2D, k: Mod, x: number, y: number) 
     const bx = Math.min(...xs), by = Math.min(...ys);
     k.env.onBox({ json: k.json, x: bx, y: by, w: Math.max(...xs) - bx, h: Math.max(...ys) - by });
   }
+  applyLoops(ctx, k);
   draw(ctx, k);
   ctx.restore();
 }
@@ -851,6 +906,13 @@ export class KlwpRenderer {
     };
     walk(this.root);
     return max;
+  }
+
+  /** Whether any module has a LOOP animation, so a live preview should redraw continuously. */
+  get animated(): boolean {
+    const walk = (m: Mod): boolean =>
+      ((m.json.internal_animations as Record<string, unknown>[] | undefined) ?? []).some((a) => String(a.type).startsWith('LOOP')) || m.children.some(walk);
+    return walk(this.root);
   }
 
   get warnings(): string[] {

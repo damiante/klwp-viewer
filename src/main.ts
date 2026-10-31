@@ -343,10 +343,16 @@ stage.addEventListener('drop', async (e) => {
   if (f) await openBytes(new Uint8Array(await f.arrayBuffer()), f.name);
 });
 
-// Keep clocks ticking.
-setInterval(() => {
-  if (!drag) app.render();
-}, 1000);
+// Keep clocks ticking; presets with loop animations redraw at ~30 fps.
+let lastTick = 0;
+const tick = (t: number) => {
+  if (!drag && t - lastTick >= (app.renderer?.animated ? 33 : 1000)) {
+    lastTick = t;
+    app.render();
+  }
+  requestAnimationFrame(tick);
+};
+requestAnimationFrame(tick);
 
 // Deep link: ?preset=samples/art_deco.klwp
 const initial = new URLSearchParams(location.search).get('preset');

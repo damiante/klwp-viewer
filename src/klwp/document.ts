@@ -306,7 +306,7 @@ export class KlwpDocument {
       return;
     }
     for (const a of anims) {
-      for (const [k, values] of [['type', ENUMS.animationType], ['action', ENUMS.animationAction], ['rule', ENUMS.animationRule], ['center', ENUMS.animationCenter]] as const) {
+      for (const [k, values] of [['type', ENUMS.animationType], ['action', ENUMS.animationAction], ['rule', ENUMS.animationRule], ['center', ENUMS.animationCenter], ['ease', ENUMS.animationEase], ['anchor', ENUMS.animationAnchor]] as const) {
         if (a[k] !== undefined && !(values as readonly string[]).includes(String(a[k]))) {
           throw new EditError(`animation ${k} must be one of ${values.join(', ')}`);
         }

@@ -127,7 +127,8 @@ Check a formula with `klwp eval file.klwp '$df(EEEE)$'` (uses simulated device d
 - The preview simulates device data (time is real unless `--time`; battery 76 %, 21 °C partly cloudy,
   song "Midnight City" by M83 playing). Notification, calendar and similar providers render empty.
 - Not previewed but saved correctly: `paint_mode` blend modes, `fx_mask`, layer `config_fx`,
-  colour filters, `bitmap_dim`, animations other than horizontal SCROLL, and touch events
+  colour filters, `bitmap_dim`, animations other than horizontal SCROLL and LOOP_FW/LOOP_2W
+  (rotate, fade, scroll, scale), and touch events
   (the wallpaper still runs them on the phone).
 
 ## Files
